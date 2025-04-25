@@ -9,6 +9,8 @@ from callback_query.callback_menu import router_call
 from callback_query.get_vless import vless_router
 from heandlers.users import router_users
 from database.models import init_models
+from middlewares.register_user import RegisterUserMiddleware
+from payments.vless_payments import vless_payment_router
 
 # Загрузка переменных окружения
 load_dotenv(find_dotenv())
@@ -32,9 +34,14 @@ async def shutdown(dispatcher: Dispatcher):
 async def main():
     dp = Dispatcher()
 
+    # Подключаем middleware ДО роутеров
+    dp.message.middleware(RegisterUserMiddleware())
+    dp.callback_query.middleware(RegisterUserMiddleware())
+
     # Подключаем роутеры
     dp.include_router(router_users)
     dp.include_router(router_call)
+    dp.include_router(vless_payment_router)
     dp.include_router(vless_router)
 
     # Подключаем события старта/остановки

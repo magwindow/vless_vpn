@@ -49,6 +49,9 @@ def generate_client_link(client: dict, inbound: dict) -> str:
     server_address = os.getenv("SERVER_ADDRESS")  # только IP или домен без http
     port = inbound["port"]
 
+    # Отладка для streamSettings и realitySettings
+    # print("Stream Settings:", stream_settings)
+
     if protocol == "vmess":
         vmess_config = {
             "v": "2",
@@ -67,12 +70,43 @@ def generate_client_link(client: dict, inbound: dict) -> str:
 
     elif protocol == "vless":
         uuid_ = client["id"]
-        network = stream_settings.get("network", "")
-        path = stream_settings.get("wsSettings", {}).get("path", "")
-        tls = "tls" if stream_settings.get("security") == "tls" else "none"
-        sni = stream_settings.get("tlsSettings", {}).get("serverName", "")
+        email = client["email"]
+        network = stream_settings.get("network", "tcp")
+        security = stream_settings.get("security", "none")
         flow = client.get("flow", "")
-        return f"vless://{uuid_}@{server_address}:{port}?type={network}&security={tls}&sni={sni}&path={path}&flow={flow}#{client['email']}"
+
+        # По умолчанию пустые значения
+        pbk = fp = sni = sid = spx = ""
+
+        # Если используется reality, достаём нужные поля
+        if security == "reality":
+
+            reality_settings = stream_settings.get("realitySettings", {})
+            # print("Reality Settings:", reality_settings)
+
+            # Доступ к settings внутри realitySettings
+            settings = reality_settings.get("settings", {})
+            pbk = settings.get("publicKey", "")
+            sid = reality_settings.get("shortIds", [""])[0]  # Берём первый из shortIds
+            spx = settings.get("spiderX", "")
+            sni = settings.get("serverName", "")
+
+            # Если sni пустое, используем значение по умолчанию
+            if not sni:
+                sni = "google.com"
+
+            fp = settings.get("fingerprint", "")
+
+        # Добавляем "test-" перед email
+        email = f"test-{email}"
+
+        # Генерация ссылки
+        return (
+            f"vless://{uuid_}@{server_address}:{port}"
+            f"?type={network}&security={security}"
+            f"&pbk={pbk}&fp={fp}&sni={sni}&sid={sid}&spx={spx}"
+            f"&flow={flow}#{email}"
+        )
 
     else:
         return f"🔗 Протокол {protocol} пока не поддерживается."
@@ -149,8 +183,15 @@ async def add_client(inbound_id: int, total_gb: int, expiry_days: int, flow: str
     response = session.post(vless_url + "panel/api/inbounds/addClient", json=data)
 
     if response.status_code == 200 and response.json().get("success"):
+        # Получаем актуальный inbound после добавления клиента
         updated_inbound = get_inbound(session, inbound_id)
-        client_link = generate_client_link(new_client, updated_inbound)
+
+        # Берем клиента с нужным email (вдруг X-UI изменил что-то)
+        updated_clients = json.loads(updated_inbound["settings"]).get("clients", [])
+        matching_client = next((c for c in updated_clients if c["email"] == email), new_client)
+
+        # Генерация ссылки по обновлённым данным
+        client_link = generate_client_link(matching_client, updated_inbound)
 
         key = VlessKey(
             uuid=new_client["id"],

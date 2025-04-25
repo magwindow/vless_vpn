@@ -1,5 +1,5 @@
 from keyboards.menu_keyboard import main_keyboard
-from database.crud import add_user_if_not_exists
+from database.models import add_user_if_not_exists
 from aiogram import Router
 from aiogram.filters import CommandStart
 from aiogram.types import Message

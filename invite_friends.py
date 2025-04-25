@@ -16,3 +16,5 @@ async def handle_invite(message: Message):
         f"Просто отправь ему эту ссылку:\n\n{invite_url}",
         reply_markup=await main_keyboard()
     )
+
+

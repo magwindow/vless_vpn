@@ -7,7 +7,6 @@ from sqlalchemy import select
 
 vless_router = Router()
 
-
 INBOUND_ID = 1
 FLOW = "xtls-rprx-vision"
 
@@ -80,3 +79,21 @@ async def show_tariffs(callback: CallbackQuery):
         "💳 Выберите тариф для подключения VLESS:",
         reply_markup=keyboard
     )
+
+
+@vless_router.callback_query(F.data == "manual")
+async def manual_vless(callback: CallbackQuery):
+    await callback.message.edit_text(
+        "Вся установка займет не более 2-х минут.\n\n"
+        "<b>1. Скачайте приложение:</b>\n\n"
+        '📱 <a href="https://apps.apple.com/ru/app/streisand/id6450534064">Скачать на iOS</a>\n'
+        '📱 <a href="https://play.google.com/store/apps/details?id=com.v2raytun.android">Скачать на Android</a>\n\n'
+        "<b>2. Получите VPN ключ.</b>\n\n"
+        'Получите ключ по кнопке "Получить ключ".\n\n'
+        "<b> Активируйте VPN ключ.</b>\n\n"
+        "Скопируйте полученный ключ и откройте скаченное приложение.\n\n"
+        'Нажмите на плюсик в правом верхнем углу экрана и нажмите на кнопку "Вставить из буфера".\n\n'
+        "Нажмите на большую кнопку подключения в центре экрана.",
+        reply_markup=await main_keyboard()
+    )
+
