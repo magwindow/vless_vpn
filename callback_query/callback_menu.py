@@ -47,6 +47,6 @@ async def show_user_keys(call: CallbackQuery):
     text = "🔑 Ваши VLESS ключи:\n\n"
     for idx, key in enumerate(keys, 1):
         expires = key.expires_at.strftime("%d-%m-%Y") if key.expires_at else "∞"
-        text += f"{idx}. <code>{key.access_url}</code>\n📅 До: {expires}\n\n"
+        text += f"{idx}. <code>{key.access_url}</code>\n📅 Действителен до: {expires}\n\n"
 
     await call.message.edit_text(text, reply_markup=await main_keyboard())

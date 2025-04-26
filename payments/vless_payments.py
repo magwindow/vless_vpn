@@ -15,10 +15,10 @@ INBOUND_ID = 1
 FLOW = "xtls-rprx-vision"
 
 TARIFFS_VLESS = {
-    "month": 349,
-    "three_month": 999,
-    "six_month": 1999,
-    "year": 3399
+    "month": 199,
+    "three_month": 549,
+    "six_month": 1299,
+    "year": 2799
 }
 
 
@@ -142,8 +142,8 @@ async def pay_card(call: CallbackQuery):
     tariff = tariff_selection.get(call.from_user.id, "month")
     price = TARIFFS_VLESS.get(tariff, 349)
     await call.message.answer(
-        f"💳 Переведите {price}₽ на карту и пришлите скриншот платежа:\n\n<b>2200 7001 4268 8075</b>\n"
-        "После перевода нажмите «Я оплатил»", reply_markup=await get_confirm_payment_keyboard()
+        f"💳 Переведите <b>{price}₽</b> на карту и пришлите скриншот платежа:\n\n<b>2200 7001 4268 8075</b>\n"
+        "После перевода нажмите «<b>Я оплатил»</b>", reply_markup=await get_confirm_payment_keyboard()
     )
 
 
@@ -152,8 +152,8 @@ async def pay_sbp(call: CallbackQuery):
     tariff = tariff_selection.get(call.from_user.id, "month")
     price = TARIFFS_VLESS.get(tariff, 349)
     await call.message.answer(
-        f"📲 Переведите {price}₽ по СБП пришлите скриншот платежа:\n\n<b>+79966163393</b>\n"
-        "После перевода нажмите «Я оплатил»", reply_markup=await get_confirm_payment_keyboard()
+        f"📲 Переведите <b>{price}₽</b> по СБП пришлите скриншот платежа:\n\n<b>+79966163393</b>\n"
+        "После перевода нажмите <b>«Я оплатил»</b>", reply_markup=await get_confirm_payment_keyboard()
     )
 
 
