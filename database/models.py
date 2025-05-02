@@ -1,4 +1,4 @@
-from sqlalchemy import String, BigInteger, DateTime, select, Column
+from sqlalchemy import String, BigInteger, DateTime, select, Column, Integer, Boolean
 from sqlalchemy.ext.asyncio import AsyncAttrs, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from datetime import datetime
@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv('DATABASE_URL', 'sqlite+aiosqlite:///./db.sqlite3')
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 # Базовый класс моделей
@@ -44,18 +44,33 @@ class VlessKey(Base):
     flow: Mapped[str] = mapped_column(String(255), nullable=True)  # flow типа xtls-rprx-vision
 
 
+class PaymentRecord(Base):
+    __tablename__ = 'payments'
+
+    id = Column(Integer, primary_key=True)
+    payment_id = Column(String, unique=True)
+    user_id = Column(BigInteger)
+    tariff_key = Column(String)
+    is_paid = Column(Boolean, default=False)
+
+
 # Подключение к БД и фабрика сессий
 engine = create_async_engine(DATABASE_URL, echo=False)
 async_session = async_sessionmaker(engine, expire_on_commit=False)
 
 
-async def add_user_if_not_exists(user_id: int, username: str = None, full_name: str = None):
+async def add_user_if_not_exists(user_id: int, username: str = None, full_name: str = None, is_paid: bool = False):
     async with async_session() as session:
         async with session.begin():
             result = await session.execute(select(User).filter_by(id=user_id))
             user = result.scalar_one_or_none()
             if not user:
-                new_user = User(id=user_id, tg_username=username, full_name=full_name)
+                new_user = User(
+                    id=user_id,
+                    tg_username=username,
+                    full_name=full_name,
+                    is_paid=is_paid
+                )
                 session.add(new_user)
 
 

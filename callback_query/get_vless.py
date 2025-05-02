@@ -25,7 +25,7 @@ async def send_trial(callback: CallbackQuery):
     try:
         key = await add_client(
             inbound_id=INBOUND_ID,
-            total_gb=5,
+            total_gb=20,
             expiry_days=3,
             flow=FLOW,
             chat_id=user_id,
@@ -66,7 +66,7 @@ async def send_paid(callback: CallbackQuery):
 
         await callback.message.answer(
             f"✅ Ваш VLESS ключ:\n\n<code>{key.access_url}</code>\n"
-            f"📅 Срок: до {key.expires_at.strftime('%Y-%m-%d')}", reply_markup=await tariff_keyboard()
+            f"📅 Срок: до {key.expires_at.strftime('%d-%m-%Y')}", reply_markup=await tariff_keyboard()
         )
     except Exception as e:
         await callback.message.answer(f"Ошибка: {str(e)}")
